@@ -1,4 +1,4 @@
-# Garmin Last current song
+# Garmin Lambda Last.FM current song
 
 
 
