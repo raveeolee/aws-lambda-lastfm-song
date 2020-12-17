@@ -39,25 +39,25 @@ class HandlerIntegrationTest {
         System.out.println(result);
     }
 
-  @Test
-  void onUserMissing() {
-    HashMap<String, Object> event = new HashMap<>();
-    HashMap<String, Object> params = new HashMap<>();
+    @Test
+    void onUserMissing() {
+        HashMap<String, Object> event = new HashMap<>();
+        HashMap<String, Object> params = new HashMap<>();
 
-    Context context = new TestContext();
-    Handler handler = new Handler();
+        Context context = new TestContext();
+        Handler handler = new Handler();
 
-    String message = Assertions.assertThrows(RuntimeException.class, () -> {
-      handler.handleRequest(event, context);
-    }).getMessage();
+        String message = Assertions.assertThrows(RuntimeException.class, () -> {
+            handler.handleRequest(event, context);
+        }).getMessage();
 
-    assertEquals(
-            "{\n" +
-            "  \"errorType\": \"BadRequest\",\n" +
-            "  \"requestId\": \"495b12a8-xmpl-4eca-8168-160484189f99\",\n" +
-            "  \"httpStatus\": 400,\n" +
-            "  \"message\": \"User must be specified\"\n" +
-            "}",
-            message);
-  }
+        assertEquals(
+                "{\n" +
+                        "  \"errorType\": \"BadRequest\",\n" +
+                        "  \"requestId\": \"495b12a8-xmpl-4eca-8168-160484189f99\",\n" +
+                        "  \"httpStatus\": 400,\n" +
+                        "  \"message\": \"User must be specified\"\n" +
+                        "}",
+                message);
+    }
 }
