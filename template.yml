@@ -5,7 +5,7 @@ Resources:
   function:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: build/distributions/java-basic.zip
+      CodeUri: build/distributions/aws-lambda-lastfm-song.zip
       Handler: example.Handler
       Runtime: java8
       Description: Java function
