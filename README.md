@@ -40,12 +40,12 @@ Download or clone this repository.
 To create a new bucket for deployment artifacts, run `1-create-bucket.sh`.
 
     $ ./1-create-bucket.sh
-    make_bucket: lambda-artifacts-a5e4xmplb5b22e0d
+     lambda-artifacts-a5e4xmplb5b22e0d
 
 # Deploy
 To deploy the application, run `2-deploy.sh`.
 
-    java-basic$ ./2-deploy.sh
+    $ ./2-deploy.sh
     BUILD SUCCESSFUL in 1s
     Successfully packaged artifacts and wrote output template to file out.yml.
     Waiting for changeset to be created..
