@@ -1,11 +1,15 @@
 # Garmin Lambda Last.FM current song
 
 ### Install the App
-- Create Last.FM account. Connect your Spotify to it.
+- Create Last.FM account. 
+- Have something to scrobble on it. Like connect your Spotify to it.
 - Install Eclipse with Garmin SDK & Connect IQ plugin.
+- Go to 
+```
+cd garmin_watch_face_ui/
+```
 
-- Go to cd garmin_watch_face_ui/ Import this folder in Eclipse
-
+- Import this folder in Eclipse.
 - Edit Resources > strings.xml with your AWS endpoint & Last.FM user.
 ```
 <resources>
