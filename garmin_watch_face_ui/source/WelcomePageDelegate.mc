@@ -15,16 +15,42 @@ class WelcomePageDelegate extends Ui.BehaviorDelegate {
     hidden var _max = _step;
     hidden var _progressBar;
     hidden var _allItems = [];
+    hidden var _mainTimer;
 
     // Handle menu button press
     function onMenu() {
-        showCurrentSong();
+    	System.println("Menu");
+    	startLoopCheckingCurrentSong();
+        //showCurrentSong();
         return true;
     }
 
     function onSelect() {
-        showCurrentSong();
+    	System.println("Select");
+        startLoopCheckingCurrentSong();
         return true;
+    }
+    
+    function startLoopCheckingCurrentSong() {
+    	if (_allItems.size() == 0) {
+    		
+    		showProgress();
+    		
+    		var timer = new Timer.Timer();
+			timer.start(method(:showCurrentSong), 9000, true);
+			_mainTimer = timer;
+		}
+        
+    }
+    
+    function showProgress() {
+    	_progressBar = new Ui.ProgressBar(
+	            "Loading ...",
+	            0
+	        );
+	        
+	    Ui.pushView(_progressBar, self, Ui.SLIDE_DOWN);
+    	_progressBar.setProgress(30);
     }
      
     // Set up the callback to the view
@@ -34,7 +60,7 @@ class WelcomePageDelegate extends Ui.BehaviorDelegate {
     }
 
     function makeRequestTo(toDo) {
-        _notify.invoke("...");
+        //_notify.invoke("...");
         resetState();
         
         var headers = {
@@ -61,12 +87,9 @@ class WelcomePageDelegate extends Ui.BehaviorDelegate {
     }
        
     function showCurrentSong() {
-    	_progressBar = new Ui.ProgressBar(
-            "Loading ...",
-            50
-        );
-    	
-    	Ui.pushView(_progressBar, self, Ui.SLIDE_DOWN);
+    	if (_allItems.size() == 0) {   
+	    	_progressBar.setProgress(60);   	
+    	}
     
     	makeRequestTo(method(:onReceive));
     }
@@ -97,11 +120,6 @@ class WelcomePageDelegate extends Ui.BehaviorDelegate {
 			timer.start(method(:switchToWelcome), 2000, false);
             return;
     	}
-   	
-    	var isFirst = _allItems.size() == 0;
-    	if (isFirst) {
-        	_progressBar.setProgress(50);
-        }
         
         var song = parseSong(data);        
         addNewItems(song);        
@@ -119,14 +137,29 @@ class WelcomePageDelegate extends Ui.BehaviorDelegate {
             		return;
             	}
         }
-
+		
+		if (_allItems.size() > 4) {
+			_allItems = _allItems.slice(2, _allItems.size());
+		}
+		
+		if (_allItems.size() > 0) {
+			_allItems.add("---------------------------\n");
+		}
+		
         _allItems.add(song);
     }
        
     function showResults(results) {    
     	Ui.popView(Ui.SLIDE_IMMEDIATE);	
     	Ui.switchToView(new ResultsView(results.slice(_shift, _step)), 
-    				new ResultsPageDelegate(results, _shift, _step), Ui.SLIDE_IMMEDIATE); 
+    				new ResultsPageDelegate(results, _shift, _step, self), 
+    				Ui.SLIDE_IMMEDIATE
+    	); 
+    }
+    
+    function reset() {
+    	_mainTimer.stop();
+    	_allItems = [];
     }
     
     function showMessagePage(results, allLines) {

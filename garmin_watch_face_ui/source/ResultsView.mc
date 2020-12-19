@@ -10,6 +10,7 @@ class ResultsView extends Ui.View {
 	var mMessage;
     var mModel;
     var mDc;
+    var mTimer;
 
     function initialize(results) {
         Ui.View.initialize();

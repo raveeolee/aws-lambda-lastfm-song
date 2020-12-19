@@ -48,7 +48,7 @@ class WelcomeView extends Ui.View {
     	for (var i = 0; i < max; i++) {
     		result += content[i];
     	}
-    	
+
     	dc.drawText(dc.getWidth() / 2, 20, Graphics.FONT_SYSTEM_XTINY, result, Graphics.TEXT_JUSTIFY_CENTER);
     }
 
@@ -60,5 +60,10 @@ class WelcomeView extends Ui.View {
     	System.println("On Receive");
         mMessage = args;
         Ui.requestUpdate();
+    }
+    
+    function onBack() {
+    	System.exit();
+    	return true;
     }
 }

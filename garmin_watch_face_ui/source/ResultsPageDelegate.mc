@@ -13,14 +13,16 @@ class ResultsPageDelegate extends Ui.BehaviorDelegate {
     hidden var _step = 8;
     hidden var _max = _step;
     hidden var _next;
+    hidden var _previous;
 
 	// Set up the callback to the view
-    function initialize(results, shift, step) {   
+    function initialize(results, shift, step, previous) {   
     	Ui.BehaviorDelegate.initialize();
     	
     	self._results = results;  	
     	self._shift = shift;
     	self._step = step;  
+    	self._previous = previous;
     	
     	showNextPage(results);
     }
@@ -68,10 +70,13 @@ class ResultsPageDelegate extends Ui.BehaviorDelegate {
     }   
     
     function onBack() {
+    	System.println("Back");
+    	_previous.reset();
     	System.exit();
     } 
     
     function showPreviousPage() {
+    	_previous.reset();
     	Ui.popView(Ui.SLIDE_IMMEDIATE);
     }
 }
