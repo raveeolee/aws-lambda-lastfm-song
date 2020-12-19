@@ -62,8 +62,8 @@ class WelcomePageDelegate extends Ui.BehaviorDelegate {
        
     function showCurrentSong() {
     	_progressBar = new Ui.ProgressBar(
-            "",
-            0
+            "Loading ...",
+            50
         );
     	
     	Ui.pushView(_progressBar, self, Ui.SLIDE_DOWN);
