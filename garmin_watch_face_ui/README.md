@@ -4,6 +4,7 @@
 - Create Last.FM account. 
 - Have something to scrobble on it. Like connect your Spotify to it.
 - Install Eclipse with Garmin SDK & Connect IQ plugin.
+https://developer.garmin.com/connect-iq/sdk/
 - Go to 
 ```
 cd garmin_watch_face_ui/
