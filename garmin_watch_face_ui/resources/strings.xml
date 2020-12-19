@@ -1,5 +1,5 @@
 <resources>
     <string id="AppName">Last.Fm Song</string>
-    <string id="backend_url">https://XXXX.execute-api.eu-west-2.amazonaws.com/song</string>
-    <string id="last_fm_user">RavAngell</string>
+    <string id="backend_url">https://...amazonaws.com/song</string>
+    <string id="last_fm_user">YOUR_USER</string>
 </resources>
