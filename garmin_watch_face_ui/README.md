@@ -1,15 +1,17 @@
 # Garmin Lambda Last.FM current song
 
 ### Install the App
-- Create Last.FM account. 
-- Have something to scrobble on it. Like connect your Spotify to it.
+- Get Last.FM account. 
+- Have something to scrobble on it. Like connect your Spotify or install local scrobbler App.
+
+
+### Building with via local eclipse 
 - Install Eclipse with Garmin SDK & Connect IQ plugin.
 https://developer.garmin.com/connect-iq/sdk/
 - Go to 
 ```
 cd garmin_watch_face_ui/
 ```
-
 - Import this folder in Eclipse.
 - Edit Resources > strings.xml with your AWS endpoint & Last.FM user.
 ```
@@ -21,3 +23,13 @@ cd garmin_watch_face_ui/
 ```
 - Go to Connect IQ > Build for Device wizard - Specify location on your watch.
 - Tested on Fenix 3 HR.
+
+### Building with Docker
+- Make sure Docker is installed
+- Edit resources/strings.xml with your settings
+
+```
+sh build.sh
+```
+- Connect watch, wait 30 seconds. 
+- Place aws_song.prg in GARMIN/APPS
