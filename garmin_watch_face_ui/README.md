@@ -25,11 +25,15 @@ cd garmin_watch_face_ui/
 - Tested on Fenix 3 HR.
 
 ### Building with Docker
-- Make sure Docker is installed
 - Edit resources/strings.xml with your settings
+- Start:
 
 ```
-sh build.sh
+$ sh build.sh 
+Developer certificate keys generated here: /Users/kevinsqueak/eclipse-workspace
+Folder: /Users/kevinsqueak/eclipse-workspace/aws-lambda-lastfm-song/garmin_watch_face_ui/
+Certificate keys already created
+
 ```
 - Connect watch, wait 30 seconds. 
 - Place aws_song.prg in GARMIN/APPS
