@@ -31,7 +31,7 @@ cd garmin_watch_face_ui/
 ```
 $ sh build.sh 
 Developer certificate keys generated here: ~/eclipse-workspace
-Folder: /Users/kevinsqueak/eclipse-workspace/aws-lambda-lastfm-song/garmin_watch_face_ui/
+Folder: ~/eclipse-workspace/aws-lambda-lastfm-song/garmin_watch_face_ui/
 Certificate keys already created
 
 ```
