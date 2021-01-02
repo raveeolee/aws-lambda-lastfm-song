@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 'AWS::Serverless-2016-10-31'
+Transform: AWS::Serverless-2016-10-31
 Description: An AWS Lambda application that calls the Lambda API.
 Resources:
   ddbTable:
@@ -15,23 +15,18 @@ Resources:
   function:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: build/distributions/aws-lambda-lastfm-song.zip
+      CodeUri: s3://lambda-artifacts-6c65e1d0551810ea/f8282bfef77b1de807b65613c21032c7
       Handler: example.Handler
       Runtime: java8
       Description: Java function
       Environment:
         Variables:
-          DDB_TABLE: !Ref ddbTable
+          DDB_TABLE:
+            Ref: ddbTable
       MemorySize: 512
       Timeout: 10
-      # Function's execution role
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !Ref ddbTable
-        #- DynamoDBWritePolicy:
-        #    TableName: !Ref ddbTable
-        #- AWSLambdaBasicExecutionRole
-        #- AWSLambdaReadOnlyAccess
-        #- AWSXrayWriteOnlyAccess
-        #- AWSLambdaVPCAccessExecutionRole
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: ddbTable
       Tracing: Active

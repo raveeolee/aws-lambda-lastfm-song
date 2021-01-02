@@ -1,43 +1,49 @@
 package example;
 
+
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.*;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Handler implements RequestHandler<Map<String,Object>, String> {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+    private DynamoDB initDynamoDbClient() {
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();
+        //standard.setRegion(Region.getRegion(Regions.EU_WEST_2).getName());
+        return new DynamoDB(client);
+    }
+
     @Override
     public String handleRequest(Map<String,Object> event, Context context) {
         logEnvironmentVariables(event, context);
-        String url = createUrl(event, context);
+        DynamoDB dynamoDB = initDynamoDbClient();
+        Table access_key = dynamoDB.getTable(System.getenv().get("DDB_TABLE"));
+        access_key.putItem(
+                new Item()
+                        .with("id", "4")
+        );
 
-        try {
-            Document doc = scrapePage(url);
-
-            String track   = doc.select(".chartlist-row .chartlist-name").first().text();
-            String artist  = doc.select(    ".chartlist-row .chartlist-artist").first().text();
-
-            return gson.toJson(new ArtistResponseJson(artist, track));
-
-        } catch (Exception e) {
-            throw error(e.getMessage(), 500, context);
+        ItemCollection<ScanOutcome> scan = access_key.scan();
+        List<String> result = new ArrayList<>();
+        for (Item item : scan) {
+            item.toJSON();
         }
+        return gson.toJson(result);
     }
 
-    private Document scrapePage(String url) throws Exception {
-        return Jsoup.connect(url).get();
-    }
-    
+    //private
+
     private void logEnvironmentVariables(Map<String,Object> event, Context context) {
         LambdaLogger logger = context.getLogger();
 
@@ -45,17 +51,6 @@ public class Handler implements RequestHandler<Map<String,Object>, String> {
         logger.log("CONTEXT: " + gson.toJson(context));
         logger.log("EVENT: " + gson.toJson(event));
         logger.log("EVENT TYPE: " + event.getClass().toString());
-    }
-
-    private String createUrl(Map<String, Object> event, Context context) {
-        Map<String, Object> queryStringParameters = (Map<String, Object>) event.getOrDefault("queryStringParameters", new LinkedHashMap<>());
-        Object user = queryStringParameters.get("user");
-
-        if (user == null) {
-            throw error("User must be specified", 400, context);
-        }
-
-        return "https://www.last.fm/user/" + user.toString();
     }
 
     private RuntimeException error(String errorMessage, int code, Context context) {
