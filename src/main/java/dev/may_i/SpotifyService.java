@@ -1,130 +1,34 @@
 package dev.may_i;
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Item;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import okhttp3.*;
-import java.util.Optional;
+import okhttp3.Request;
 
 public class SpotifyService {
-    private static final String GET_CODE_URL =
-            "https://accounts.spotify.com/authorize?client_id=%s&response_type=code&scope=user-read-playback-state&redirect_uri=%s";
+    private static final String CURRENT_TRACK = "https://api.spotify.com/v1/me/player/currently-playing?market=GB";
 
-    private static final String TOKEN_URL =
-            "https://accounts.spotify.com/api/token";
+    private SpotifyToken accessToken;
+    private SpotifyAuthService authService;
+    private RequestExecutor requestExecutor;
 
-    private final LambdaContext context;
-    private final DynamoDB dynamoDB;
-    private final RequestExecutor requester;
-
-    public SpotifyService(LambdaContext context,
-                          DynamoDB dynamoDB,
-                          RequestExecutor requester) {
-        this.context = context;
-        this.dynamoDB = dynamoDB;
-        this.requester = requester;
+    public SpotifyService(SpotifyToken accessToken, SpotifyAuthService authService, RequestExecutor requestExecutor) {
+        this.accessToken = accessToken;
+        this.authService = authService;
+        this.requestExecutor = requestExecutor;
     }
 
-    public SpotifyToken getOrSaveToken(Table db,
-                                       String code,
-                                       UserCredentials credentials,
-                                       String redirect) {
-
-        return getExistingTokenFromDb(db)
-                .orElseGet(() -> {
-                    SpotifyToken token = getAccessToken(code, credentials, redirect);
-                    db.putItem(token.toItem());
-                    return token;
-                });
-    }
-
-    private Optional<SpotifyToken> getExistingTokenFromDb(Table db) {
-        return Optional.ofNullable(db.getItem("id", "token"))
-                .map(SpotifyToken::new);
-    }
-
-    private SpotifyToken getAccessToken(String code, UserCredentials credentials, String redirect) {
-
-        OkHttpClient client = new OkHttpClient();
-        RequestBody body = new FormBody.Builder()
-                .addEncoded("grant_type", "authorization_code")
-                .addEncoded("code", code)
-                .addEncoded("redirect_uri", redirect)
-                .build();
-
+    public SpotifyTrack currentTrack() {
         Request request = new Request.Builder()
-                .addHeader("Authorization",
-                        Credentials.basic(credentials.getClientId(), credentials.getSecret()))
-                .addHeader("Content-Type", "application/x-www-form-urlencoded")
-                .url(TOKEN_URL)
-                .post(body)
+                .addHeader("Authorization", "Bearer " + token())
+                .addHeader("Content-Type", "application/json")
+                .url(CURRENT_TRACK)
+                .get()
                 .build();
-
-        return requester.executeRequest(request, client, SpotifyToken.class);
+        return requestExecutor.executeRequest(request, SpotifyTrack.class);
     }
 
-    public String requestAuthCode(Table db, String clientId, String redirectUrl) {
-        Item item = db.getItem("id", "code");
-        if (item != null) {
-            return item.get("code").toString();
+    private SpotifyToken token() {
+        if (accessToken.isExpired()) {
+            authService.getAccessToken();
         }
-
-        String url = String.format(GET_CODE_URL, clientId, redirectUrl);
-        throw new ApiException(url);
-    }
-
-    public <T> UserCredentials makeSureClientIdAndSecretPresent(Table db) {
-        Optional<T> client_id = context.getQueryStringParameter("client_id");
-        Optional<T> secret    = context.getQueryStringParameter("secret");
-
-        Item dbClientIdItem = db.getItem("id", "client_id");
-        if (dbClientIdItem == null && (! client_id.isPresent() || ! secret.isPresent())) {
-            throw new ApiException("Please provide client id and secret");
-        }
-
-        Object clientFromDb = dbClientIdItem == null ? null : dbClientIdItem.get("client_id");
-        if (dbClientIdItem == null || clientFromDb == null) {
-            db.putItem(
-                    new Item().with("id", "client_id")
-                    .with("client_id", client_id.get())
-                    .with("secret",    secret.get())
-            );
-
-            return new UserCredentials(
-                    client_id.get().toString(),
-                    secret.toString()
-            );
-        }
-
-        return new UserCredentials(
-                clientFromDb.toString(),
-                dbClientIdItem.get("secret").toString()
-        );
-    }
-
-    public void saveCodeWhenOauthCodeCallback(Table db) {
-        context.getQueryStringParameter("code")
-                .ifPresent(code -> db.putItem(new Item().with("id", "code").with("code", code)));
-    }
-
-    public SpotifyToken getAccessToken() {
-        Table accessKeyTbl = dynamoDB.getTable(System.getenv().get("DDB_TABLE"));
-        Optional<SpotifyToken> existingTokenFromDb = getExistingTokenFromDb(accessKeyTbl);
-        if (existingTokenFromDb.isPresent()) {
-            return existingTokenFromDb.get();
-        }
-
-        saveCodeWhenOauthCodeCallback(accessKeyTbl);
-        UserCredentials credentials = makeSureClientIdAndSecretPresent(accessKeyTbl);
-
-        String redirectUrl          = context.getDomainName();
-        String code                 = requestAuthCode(accessKeyTbl, credentials.getClientId(), redirectUrl);
-
-        return getOrSaveToken(
-                accessKeyTbl,
-                code,
-                credentials,
-                redirectUrl
-        );
+        return accessToken;
     }
 }

@@ -24,4 +24,8 @@ public class RequestExecutor {
             throw new RequestFailedException("Failed to execute request " + request.toString());
         }
     }
+
+    public <T> T executeRequest(Request request, Class<T> tClass) {
+        return executeRequest(request, new OkHttpClient(), tClass);
+    }
 }

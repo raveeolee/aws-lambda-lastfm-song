@@ -9,6 +9,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Handler implements RequestHandler<Map<String,Object>, String> {
 
@@ -28,10 +29,16 @@ public class Handler implements RequestHandler<Map<String,Object>, String> {
             DynamoDB dynamoDB = initDynamoDbClient();
             RequestExecutor requestExecutor = new RequestExecutor(gson);
 
-            SpotifyService spotifyService = new SpotifyService(lambdaContext, dynamoDB, requestExecutor);
-            SpotifyToken accessToken = spotifyService.getAccessToken();
+            SpotifyAuthService authService = new SpotifyAuthService(lambdaContext, dynamoDB, requestExecutor);
+            SpotifyToken accessToken = authService.getAccessToken();
 
-            return gson.toJson(accessToken);
+            SpotifyService spotifyService = new SpotifyService(accessToken, authService, requestExecutor);
+            SpotifyTrack spotifyTrack = spotifyService.currentTrack();
+            String artists = spotifyTrack.getItem().getArtists().stream()
+                    .map(SpotifyTrack.Artist::getName)
+                    .collect(Collectors.joining(","));
+
+            return gson.toJson(new ArtistResponseJson(artists, spotifyTrack.getItem().getName()));
 
         } catch (Throwable e) {
             return gson.toJson(new ApiError(e.getMessage()));

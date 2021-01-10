@@ -11,7 +11,6 @@ public class SpotifyToken {
     private String refresh_token;
     private String scope;
 
-
     public SpotifyToken(String access_token, String token_type, Long expires_in, String refresh_token, String scope) {
         this.access_token = access_token;
         this.token_type = token_type;
@@ -79,5 +78,9 @@ public class SpotifyToken {
         this.expires_in = ((BigDecimal) item.get("expires_in")).longValue();
         this.refresh_token = item.get("refresh_token").toString();
         this.scope = item.get("scope").toString();
+    }
+
+    public boolean isExpired() {
+        return false;
     }
 }
