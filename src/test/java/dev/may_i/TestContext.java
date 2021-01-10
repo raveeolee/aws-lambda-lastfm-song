@@ -1,4 +1,4 @@
-package example;
+package dev.may_i;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.CognitoIdentity;

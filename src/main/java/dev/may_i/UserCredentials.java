@@ -1,4 +1,4 @@
-package example;
+package dev.may_i;
 
 public class UserCredentials {
     private String clientId;

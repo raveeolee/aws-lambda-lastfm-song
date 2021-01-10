@@ -1,4 +1,4 @@
-package example;
+package dev.may_i;
 
 import java.lang.RuntimeException;
 

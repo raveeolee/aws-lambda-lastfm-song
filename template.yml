@@ -16,7 +16,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: build/distributions/aws-lambda-lastfm-song.zip
-      Handler: example.Handler
+      Handler: dev.may_i.Handler
       Runtime: java8
       Description: Java function
       Environment:
