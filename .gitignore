@@ -48,3 +48,6 @@ out/
 
 build-info.properties
 
+bucket-name.txt
+out.yml
+

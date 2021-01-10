@@ -32,7 +32,8 @@ public class Handler implements RequestHandler<Map<String,Object>, String> {
             SpotifyToken accessToken = spotifyService.getAccessToken();
 
             return gson.toJson(accessToken);
-        } catch (Exception e) {
+
+        } catch (Throwable e) {
             return gson.toJson(new ApiError(e.getMessage()));
         }
     }

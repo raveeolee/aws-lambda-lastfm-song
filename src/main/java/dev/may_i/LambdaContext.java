@@ -3,7 +3,10 @@ package dev.may_i;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.google.gson.Gson;
+
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 public class LambdaContext {
 
@@ -26,24 +29,30 @@ public class LambdaContext {
         logger.log("EVENT TYPE: " +            event.getClass().toString());
     }
 
+    public void log(String message) {
+        context.getLogger().log(message);
+    }
+
     public String getDomainName() {
         Map<String, Object> requestContext = getSubContext("requestContext");
         return "https://" + requestContext.get("domainName") + "/code";
     }
 
-    public <T> T getQueryStringParameter(String key) {
+    public <T> Optional<T> getQueryStringParameter(String key) {
         Map<String, T> queryStringParameters = getSubContext("queryStringParameters");
-        if (queryStringParameters == null) {
-            throw new ContextException(String.format("Parameter [%s] not found", key));
+        if (queryStringParameters.isEmpty()) {
+            return Optional.empty();
         }
-        return queryStringParameters.get(key);
+
+        T value = queryStringParameters.get(key);
+        return Optional.ofNullable(value);
     }
 
     @SuppressWarnings("unchecked")
     private <T> Map<String, T> getSubContext(String name) {
-        if ((context instanceof Map)) {
+        if ((event != null)) {
             return (Map<String, T>) event.get(name);
         }
-        throw new ContextException("Context is not instance of Map.class");
+        return Collections.emptyMap();
     }
 }
