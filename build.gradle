@@ -13,6 +13,7 @@ dependencies {
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.9.0'
     implementation 'com.google.code.gson:gson:2.8.6'
     implementation 'org.jsoup:jsoup:1.11.3'
+    compile group: 'com.google.dagger', name: 'dagger', version: '2.31'
 
     testImplementation 'org.apache.logging.log4j:log4j-api:2.13.0'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.13.0'

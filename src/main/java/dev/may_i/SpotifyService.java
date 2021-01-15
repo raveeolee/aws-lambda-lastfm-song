@@ -25,10 +25,10 @@ public class SpotifyService {
         return requestExecutor.executeRequest(request, SpotifyTrack.class);
     }
 
-    private SpotifyToken token() {
+    private String token() {
         if (accessToken.isExpired()) {
-            authService.getAccessToken();
+            authService.getAccessToken().getAccess_token();
         }
-        return accessToken;
+        return accessToken.getAccess_token();
     }
 }
