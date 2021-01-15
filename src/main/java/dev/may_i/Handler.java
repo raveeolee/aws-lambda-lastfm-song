@@ -8,12 +8,20 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dagger.internal.DaggerCollections;
+
+import javax.inject.Inject;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Handler implements RequestHandler<Map<String,Object>, String> {
 
-    private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private final Gson gson;
+
+    @Inject
+    public Handler(Gson gson) {
+        this.gson = gson;
+    }
 
     private DynamoDB initDynamoDbClient() {
         AmazonDynamoDB client = AmazonDynamoDBClientBuilder.defaultClient();

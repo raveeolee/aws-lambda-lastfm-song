@@ -27,11 +27,8 @@ class HandlerIntegrationTest {
         event.put("queryStringParameters", params);
 
         Context context = new TestContext();
-        Handler handler = new Handler();
-
+        //Handler handler = new Handler();
         //handler.handleRequest(event, context);
-
-
     }
 
     @Test
