@@ -1,14 +1,12 @@
 package dev.may_i;
 
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 
 import javax.inject.Inject;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SpotifyMusicHandler implements RequestHandler<Map<String,Object>, String> {
 

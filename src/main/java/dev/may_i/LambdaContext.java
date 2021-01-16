@@ -22,8 +22,12 @@ public class LambdaContext {
 
     public void logEnvironmentVariables(Map<String,Object> event, Context context) {
         LambdaLogger logger = context.getLogger();
+        Map<String, String> getenv =
+                System.getenv() == null
+                        ? Collections.emptyMap()
+                        : System.getenv();
 
-        logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(System.getenv()));
+        logger.log("ENVIRONMENT VARIABLES: " + gson.toJson(getenv));
         logger.log("CONTEXT: " +               gson.toJson(context));
         logger.log("EVENT: " +                 gson.toJson(event));
         logger.log("EVENT TYPE: " +            event.getClass().toString());
@@ -50,9 +54,6 @@ public class LambdaContext {
 
     @SuppressWarnings("unchecked")
     private <T> Map<String, T> getSubContext(String name) {
-        if ((event != null)) {
-            return (Map<String, T>) event.get(name);
-        }
-        return Collections.emptyMap();
+        return (Map<String, T>) event.getOrDefault(name, Collections.emptyMap());
     }
 }

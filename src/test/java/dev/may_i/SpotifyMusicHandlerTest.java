@@ -1,11 +1,8 @@
 package dev.may_i;
 
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 import dev.may_i.configuration.LambdaModule;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +10,11 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -36,6 +33,8 @@ class SpotifyMusicHandlerTest {
     @Mock
     private SpotifyService spotifyService;
 
+    private final LambdaContextHelper contextHelper = new LambdaContextHelper();
+
     @BeforeEach
     void setUp() {
         gson = new LambdaModule().gson();
@@ -49,7 +48,7 @@ class SpotifyMusicHandlerTest {
     @Test
     void handleRequest_should_create_context() {
         // given
-        Map<String, Object> event = event(params(), requestContext());
+        Map<String, Object> event = contextHelper.event(contextHelper.params(), contextHelper.requestContext());
         Context context = new TestContext();
 
         // when
@@ -69,7 +68,7 @@ class SpotifyMusicHandlerTest {
         // given
         SpotifyToken token = mock(SpotifyToken.class);
         given(spotifyAuthService.getAccessToken(any())).willReturn(token);
-        Map<String, Object> event = event(params(), requestContext());
+        Map<String, Object> event = contextHelper.event(contextHelper.params(), contextHelper.requestContext());
         Context context = new TestContext();
 
         // when
@@ -80,7 +79,7 @@ class SpotifyMusicHandlerTest {
     @Test
     void should_display_current_artist() {
         // given
-        Map<String, Object> event = event(params(), requestContext());
+        Map<String, Object> event = contextHelper.event(contextHelper.params(), contextHelper.requestContext());
         Context context = new TestContext();
         given(spotifyService.currentTrack(any(), any()))
                 .willReturn(new SpotifyTrack(new SpotifyTrack.Item("Song",
@@ -104,23 +103,4 @@ class SpotifyMusicHandlerTest {
                 .isEqualTo("{\"error\":\"Some Issue\"}");
     }
 
-    private Map<String, Object> event(Map<String, Object> params,
-                                      Map<String, Object> requestContext) {
-        HashMap<String, Object> event = new HashMap<>();
-        event.put("queryStringParameters", params);
-        event.put("requestContext", requestContext);
-        return event;
-    }
-
-    private Map<String, Object> params() {
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("user", "test");
-        return params;
-    }
-
-    private Map<String, Object> requestContext() {
-        HashMap<String, Object> requestContext = new HashMap<>();
-        requestContext.put("domainName", "test.com");
-        return requestContext;
-    }
 }
