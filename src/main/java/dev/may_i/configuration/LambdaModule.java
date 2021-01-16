@@ -17,7 +17,7 @@ public class LambdaModule {
 
     @Provides @Singleton
     public Gson gson() {
-        return new GsonBuilder().setPrettyPrinting().create();
+        return new GsonBuilder().create();
     }
 
     @Provides @Singleton

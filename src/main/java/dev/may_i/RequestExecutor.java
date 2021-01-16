@@ -5,11 +5,14 @@ import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import javax.inject.Inject;
 import java.io.IOException;
 
 public class RequestExecutor {
     private final Gson gson;
 
+    @Inject
     public RequestExecutor(Gson gson) {
         this.gson = gson;
     }

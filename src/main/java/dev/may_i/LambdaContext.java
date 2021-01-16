@@ -35,7 +35,7 @@ public class LambdaContext {
 
     public String getDomainName() {
         Map<String, Object> requestContext = getSubContext("requestContext");
-        return "https://" + requestContext.get("domainName") + "/code";
+        return "https://" + requestContext.get("domainName") + "/";
     }
 
     public <T> Optional<T> getQueryStringParameter(String key) {

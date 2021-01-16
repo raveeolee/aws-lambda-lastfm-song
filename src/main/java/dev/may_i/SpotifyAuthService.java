@@ -4,6 +4,8 @@ import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import okhttp3.*;
+
+import javax.inject.Inject;
 import java.util.Optional;
 
 public class SpotifyAuthService {
@@ -16,6 +18,7 @@ public class SpotifyAuthService {
     private final DynamoDB dynamoDB;
     private final RequestExecutor requester;
 
+    @Inject
     public SpotifyAuthService(DynamoDB dynamoDB,
                               RequestExecutor requester) {
         this.dynamoDB = dynamoDB;
@@ -114,7 +117,7 @@ public class SpotifyAuthService {
         saveCodeWhenOauthCodeCallback(context, accessKeyTbl);
         UserCredentials credentials = makeSureClientIdAndSecretPresent(context, accessKeyTbl);
 
-        String redirectUrl          = context.getDomainName();
+        String redirectUrl          = context.getDomainName() + "/code";
         String code                 = requestAuthCode(accessKeyTbl, credentials.getClientId(), redirectUrl);
 
         return getOrSaveToken(

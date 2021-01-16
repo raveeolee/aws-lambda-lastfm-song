@@ -13,20 +13,14 @@ import java.util.stream.Collectors;
 public class SpotifyMusicHandler implements RequestHandler<Map<String,Object>, String> {
 
     private final Gson gson;
-    private final DynamoDB dynamoDB;
-    private final RequestExecutor requestExecutor;
-    private SpotifyAuthService authService;
+    private final SpotifyAuthService authService;
+    private final SpotifyService spotifyService;
 
     @Inject
-    public SpotifyMusicHandler(Gson gson,
-                               DynamoDB dynamoDB,
-                               RequestExecutor requestExecutor,
-                               SpotifyAuthService authService
-                               ) {
+    public SpotifyMusicHandler(Gson gson, SpotifyAuthService authService, SpotifyService spotifyService) {
         this.gson = gson;
-        this.dynamoDB = dynamoDB;
-        this.requestExecutor = requestExecutor;
         this.authService = authService;
+        this.spotifyService = spotifyService;
     }
 
     @Override
@@ -34,15 +28,11 @@ public class SpotifyMusicHandler implements RequestHandler<Map<String,Object>, S
         try {
             LambdaContext lambdaContext = new LambdaContext(gson, event, context);
             lambdaContext.logEnvironmentVariables(event, context);
+
             SpotifyToken accessToken = authService.getAccessToken(lambdaContext);
+            SpotifyTrack spotifyTrack = spotifyService.currentTrack(lambdaContext, accessToken);
 
-            SpotifyService spotifyService = new SpotifyService(accessToken, authService, requestExecutor);
-            SpotifyTrack spotifyTrack = spotifyService.currentTrack();
-            String artists = spotifyTrack.getItem().getArtists().stream()
-                    .map(SpotifyTrack.Artist::getName)
-                    .collect(Collectors.joining(","));
-
-            return gson.toJson(new ArtistResponseJson(artists, spotifyTrack.getItem().getName()));
+            return gson.toJson(spotifyTrack.toJson());
 
         } catch (Throwable e) {
             return gson.toJson(new ApiError(e.getMessage()));
