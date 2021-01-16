@@ -13,14 +13,11 @@ public class SpotifyAuthService {
     private static final String TOKEN_URL =
             "https://accounts.spotify.com/api/token";
 
-    private final LambdaContext context;
     private final DynamoDB dynamoDB;
     private final RequestExecutor requester;
 
-    public SpotifyAuthService(LambdaContext context,
-                              DynamoDB dynamoDB,
+    public SpotifyAuthService(DynamoDB dynamoDB,
                               RequestExecutor requester) {
-        this.context = context;
         this.dynamoDB = dynamoDB;
         this.requester = requester;
     }
@@ -73,7 +70,7 @@ public class SpotifyAuthService {
         throw new ApiException(url);
     }
 
-    public <T> UserCredentials makeSureClientIdAndSecretPresent(Table db) {
+    public <T> UserCredentials makeSureClientIdAndSecretPresent(LambdaContext context, Table db) {
         Optional<T> client_id = context.getQueryStringParameter("client_id");
         Optional<T> secret    = context.getQueryStringParameter("secret");
 
@@ -102,20 +99,20 @@ public class SpotifyAuthService {
         );
     }
 
-    public void saveCodeWhenOauthCodeCallback(Table db) {
+    public void saveCodeWhenOauthCodeCallback(LambdaContext context, Table db) {
         context.getQueryStringParameter("code")
                 .ifPresent(code -> db.putItem(new Item().with("id", "code").with("code", code)));
     }
 
-    public SpotifyToken getAccessToken() {
+    public SpotifyToken getAccessToken(LambdaContext context) {
         Table accessKeyTbl = dynamoDB.getTable(System.getenv().get("DDB_TABLE"));
         Optional<SpotifyToken> existingTokenFromDb = getExistingTokenFromDb(accessKeyTbl);
         if (existingTokenFromDb.isPresent()) {
             return existingTokenFromDb.get();
         }
 
-        saveCodeWhenOauthCodeCallback(accessKeyTbl);
-        UserCredentials credentials = makeSureClientIdAndSecretPresent(accessKeyTbl);
+        saveCodeWhenOauthCodeCallback(context, accessKeyTbl);
+        UserCredentials credentials = makeSureClientIdAndSecretPresent(context, accessKeyTbl);
 
         String redirectUrl          = context.getDomainName();
         String code                 = requestAuthCode(accessKeyTbl, credentials.getClientId(), redirectUrl);
