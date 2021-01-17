@@ -30,7 +30,7 @@ public class SpotifyMusicHandler implements RequestHandler<Map<String,Object>, S
             LambdaContext lambdaContext = new LambdaContext(gson, event, context);
             lambdaContext.logEnvironmentVariables(event, context);
 
-            SpotifyToken accessToken = authService.getAccessToken(lambdaContext);
+            SpotifyToken accessToken = authService.getOrRequestAccessToken(lambdaContext);
             SpotifyTrack spotifyTrack = spotifyService.currentTrack(lambdaContext, accessToken);
 
             return gson.toJson(spotifyTrack.toJson());

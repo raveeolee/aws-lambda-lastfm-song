@@ -2,7 +2,7 @@ package dev.may_i.domain;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 
-import java.math.BigDecimal;
+import java.util.Optional;
 
 public class SpotifyToken {
     private String access_token;
@@ -20,6 +20,14 @@ public class SpotifyToken {
     }
 
     public SpotifyToken() {
+    }
+
+    public SpotifyToken(SpotifyToken other, long expires_in) {
+        this.access_token = other.access_token;
+        this.token_type = other.token_type;
+        this.expires_in = expires_in;
+        this.refresh_token = other.refresh_token;
+        this.scope = other.scope;
     }
 
     public String getAccess_token() {
@@ -81,7 +89,8 @@ public class SpotifyToken {
     }
 
     public boolean isExpired() {
-        return false;
+        long expiresIn = Optional.ofNullable(getExpires_in()).orElse(0L);
+        return (System.currentTimeMillis() / 1000) > expiresIn;
     }
 
     @Override

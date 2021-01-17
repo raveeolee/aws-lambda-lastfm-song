@@ -3,7 +3,6 @@ package dev.may_i;
 import dev.may_i.domain.SpotifyToken;
 import dev.may_i.domain.SpotifyTrack;
 import okhttp3.Request;
-
 import javax.inject.Inject;
 
 public class SpotifyService {
@@ -20,18 +19,11 @@ public class SpotifyService {
 
     public SpotifyTrack currentTrack(LambdaContext context, SpotifyToken accessToken) {
         Request request = new Request.Builder()
-                .addHeader("Authorization", "Bearer " + token(context, accessToken))
+                .addHeader("Authorization", "Bearer " + authService.token(context, accessToken))
                 .addHeader("Content-Type", "application/json")
                 .url(CURRENT_TRACK)
                 .get()
                 .build();
         return requestExecutor.executeRequest(request, SpotifyTrack.class);
-    }
-
-    private String token(LambdaContext context, SpotifyToken accessToken) {
-        if (accessToken.isExpired()) {
-            authService.getAccessToken(context).getAccess_token();
-        }
-        return accessToken.getAccess_token();
     }
 }

@@ -35,7 +35,7 @@ public class SpotifyAuthService {
 
         return getExistingTokenFromDb(db)
                 .orElseGet(() -> {
-                    SpotifyToken token = getAccessToken(code, credentials, redirect);
+                    SpotifyToken token = getOrRequestAccessToken(code, credentials, redirect);
                     db.putItem(token.toItem());
                     return token;
                 });
@@ -46,7 +46,7 @@ public class SpotifyAuthService {
                 .map(SpotifyToken::new);
     }
 
-    private SpotifyToken getAccessToken(String code, UserCredentials credentials, String redirect) {
+    private SpotifyToken getOrRequestAccessToken(String code, UserCredentials credentials, String redirect) {
 
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
@@ -63,20 +63,23 @@ public class SpotifyAuthService {
                 .post(body)
                 .build();
 
-        return requester.executeRequest(request, client, SpotifyToken.class);
+        SpotifyToken tokenRaw = requester.executeRequest(request, client, SpotifyToken.class);
+        return new SpotifyToken(tokenRaw,
+                System.currentTimeMillis() / 1000 + tokenRaw.getExpires_in()
+        );
     }
 
-    public String requestAuthCode(Table db, String clientId, String redirectUrl) {
+    public String requestAuthCodeIfNotPreviouslySaved(Table db, String clientId, String redirectUrl) {
         Item item = db.getItem("id", "code");
         if (item != null) {
-            return item.get("code").toString();
+            return item.getString("code");
         }
 
         String url = String.format(GET_CODE_URL, clientId, redirectUrl);
         throw new ApiException(url);
     }
 
-    public <T> UserCredentials makeSureClientIdAndSecretPresent(LambdaContext context, Table db) {
+    private <T> UserCredentials makeSureClientIdAndSecretPresent(LambdaContext context, Table db) {
         Optional<T> client_id = context.getQueryStringParameter("client_id");
         Optional<T> secret    = context.getQueryStringParameter("secret");
 
@@ -85,32 +88,27 @@ public class SpotifyAuthService {
             throw new ApiException("Please provide client id and secret");
         }
 
-        Object clientFromDb = dbClientIdItem == null ? null : dbClientIdItem.get("client_id");
+        String clientFromDb = dbClientIdItem == null ? null : dbClientIdItem.getString("client_id");
         if (dbClientIdItem == null || clientFromDb == null) {
             db.putItem(
-                    new Item().with("id", "client_id")
-                    .with("client_id", client_id.get())
-                    .with("secret",    secret.get())
+                    new Item()
+                            .with("id", "client_id")
+                            .with("client_id", client_id.get())
+                            .with("secret",    secret.get())
             );
 
-            return new UserCredentials(
-                    client_id.get().toString(),
-                    secret.toString()
-            );
+            return new UserCredentials(client_id.get().toString(), secret.toString());
         }
 
-        return new UserCredentials(
-                clientFromDb.toString(),
-                dbClientIdItem.get("secret").toString()
-        );
+        return new UserCredentials(clientFromDb, dbClientIdItem.getString("secret"));
     }
 
-    public void saveCodeWhenOauthCodeCallback(LambdaContext context, Table db) {
+    private void saveCodeWhenOauthCodeCallback(LambdaContext context, Table db) {
         context.getQueryStringParameter("code")
                 .ifPresent(code -> db.putItem(new Item().with("id", "code").with("code", code)));
     }
 
-    public SpotifyToken getAccessToken(LambdaContext context) {
+    public SpotifyToken getOrRequestAccessToken(LambdaContext context) {
         Table accessKeyTbl = dynamoDB.getTable(context.getDbTableName());
         Optional<SpotifyToken> existingTokenFromDb = getExistingTokenFromDb(accessKeyTbl);
         if (existingTokenFromDb.isPresent()) {
@@ -120,8 +118,10 @@ public class SpotifyAuthService {
         saveCodeWhenOauthCodeCallback(context, accessKeyTbl);
         UserCredentials credentials = makeSureClientIdAndSecretPresent(context, accessKeyTbl);
 
-        String redirectUrl          = context.getDomainName() + "/code";
-        String code                 = requestAuthCode(accessKeyTbl, credentials.getClientId(), redirectUrl);
+        String redirectUrl = context.getDomainName() + "code";
+        String code = requestAuthCodeIfNotPreviouslySaved(
+                accessKeyTbl, credentials.getClientId(), redirectUrl
+        );
 
         return getOrSaveToken(
                 accessKeyTbl,
@@ -129,5 +129,12 @@ public class SpotifyAuthService {
                 credentials,
                 redirectUrl
         );
+    }
+
+    public String token(LambdaContext context, SpotifyToken accessToken) {
+        if (accessToken.isExpired()) {
+            getOrRequestAccessToken(context).getAccess_token();
+        }
+        return accessToken.getAccess_token();
     }
 }
