@@ -1,4 +1,4 @@
-package dev.may_i;
+package dev.may_i.domain;
 
 import com.amazonaws.services.dynamodbv2.document.Item;
 

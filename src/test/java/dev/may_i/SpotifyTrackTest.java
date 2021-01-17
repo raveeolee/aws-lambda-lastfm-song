@@ -1,6 +1,7 @@
 package dev.may_i;
 
 import com.google.gson.Gson;
+import dev.may_i.domain.SpotifyTrack;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

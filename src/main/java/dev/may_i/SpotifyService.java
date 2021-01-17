@@ -1,5 +1,7 @@
 package dev.may_i;
 
+import dev.may_i.domain.SpotifyToken;
+import dev.may_i.domain.SpotifyTrack;
 import okhttp3.Request;
 
 import javax.inject.Inject;

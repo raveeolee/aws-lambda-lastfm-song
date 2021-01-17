@@ -1,6 +1,7 @@
 package dev.may_i;
 
 import com.google.gson.Gson;
+import dev.may_i.exception.RequestFailedException;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;

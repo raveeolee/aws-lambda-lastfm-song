@@ -4,6 +4,9 @@ package dev.may_i;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
+import dev.may_i.domain.SpotifyToken;
+import dev.may_i.domain.SpotifyTrack;
+import dev.may_i.exception.ApiError;
 
 import javax.inject.Inject;
 import java.util.Map;

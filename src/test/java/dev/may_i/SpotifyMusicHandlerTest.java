@@ -3,6 +3,8 @@ package dev.may_i;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.gson.Gson;
 import dev.may_i.configuration.LambdaModule;
+import dev.may_i.domain.SpotifyToken;
+import dev.may_i.domain.SpotifyTrack;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

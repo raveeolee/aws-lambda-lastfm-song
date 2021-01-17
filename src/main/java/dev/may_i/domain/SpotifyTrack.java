@@ -1,4 +1,6 @@
-package dev.may_i;
+package dev.may_i.domain;
+
+import dev.may_i.ArtistResponseJson;
 
 import java.util.List;
 import java.util.stream.Collectors;

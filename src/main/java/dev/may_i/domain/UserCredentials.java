@@ -1,4 +1,4 @@
-package dev.may_i;
+package dev.may_i.domain;
 
 public class UserCredentials {
     private String clientId;

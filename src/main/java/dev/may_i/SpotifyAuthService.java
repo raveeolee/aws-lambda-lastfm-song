@@ -3,6 +3,9 @@ package dev.may_i;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import dev.may_i.domain.SpotifyToken;
+import dev.may_i.domain.UserCredentials;
+import dev.may_i.exception.ApiException;
 import okhttp3.*;
 
 import javax.inject.Inject;
