@@ -56,4 +56,8 @@ public class LambdaContext {
     private <T> Map<String, T> getSubContext(String name) {
         return (Map<String, T>) event.getOrDefault(name, Collections.emptyMap());
     }
+
+    public String getDbTableName() {
+        return System.getenv().get("DDB_TABLE");
+    }
 }

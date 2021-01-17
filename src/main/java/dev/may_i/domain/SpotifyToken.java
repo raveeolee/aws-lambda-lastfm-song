@@ -73,14 +73,25 @@ public class SpotifyToken {
     }
 
     public SpotifyToken(Item item) {
-        this.access_token = item.get("access_token").toString();
-        this.token_type = item.get("token_type").toString();
-        this.expires_in = ((BigDecimal) item.get("expires_in")).longValue();
-        this.refresh_token = item.get("refresh_token").toString();
-        this.scope = item.get("scope").toString();
+        this.access_token = item.getString("access_token");
+        this.token_type = item.getString("token_type");
+        this.expires_in = item.getLong("expires_in");
+        this.refresh_token = item.getString("refresh_token");
+        this.scope = item.getString("scope");
     }
 
     public boolean isExpired() {
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return "SpotifyToken{" +
+                "access_token='" + access_token + '\'' +
+                ", token_type='" + token_type + '\'' +
+                ", expires_in=" + expires_in +
+                ", refresh_token='" + refresh_token + '\'' +
+                ", scope='" + scope + '\'' +
+                '}';
     }
 }

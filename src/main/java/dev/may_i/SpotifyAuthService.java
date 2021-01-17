@@ -111,7 +111,7 @@ public class SpotifyAuthService {
     }
 
     public SpotifyToken getAccessToken(LambdaContext context) {
-        Table accessKeyTbl = dynamoDB.getTable(System.getenv().get("DDB_TABLE"));
+        Table accessKeyTbl = dynamoDB.getTable(context.getDbTableName());
         Optional<SpotifyToken> existingTokenFromDb = getExistingTokenFromDb(accessKeyTbl);
         if (existingTokenFromDb.isPresent()) {
             return existingTokenFromDb.get();
