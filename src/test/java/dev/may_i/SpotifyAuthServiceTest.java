@@ -104,7 +104,7 @@ class SpotifyAuthServiceTest {
 
         assertThatThrownBy(() -> spotifyAuthService.getOrRequestAccessToken(context))
                 .isInstanceOf(ApiException.class)
-                .hasMessage("https://accounts.spotify.com/authorize?client_id=client_id_value&response_type=code&scope=user-read-playback-state&redirect_uri=https://test.org/code");
+                .hasMessage("https://accounts.spotify.com/authorize?client_id=client_id_value&response_type=code&scope=user-read-playback-state%20user-modify-playback-state&redirect_uri=https://test.org/code");
     }
 
     @Test

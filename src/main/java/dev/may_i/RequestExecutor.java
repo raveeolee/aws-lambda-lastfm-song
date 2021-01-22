@@ -21,7 +21,7 @@ public class RequestExecutor {
     public <T> T executeRequest(Request request, OkHttpClient client, Class<T> tClass) {
         Call call = client.newCall(request);
         try (Response response = call.execute()) {
-            if (response.code() == 200)
+            if (response.isSuccessful())
                 return gson.fromJson(response.body().string(), tClass);
             throw new RequestFailedException("Request failed " + request.toString() + " " + response.code());
         } catch (IOException e) {

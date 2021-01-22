@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class SpotifyAuthService {
     private static final String GET_CODE_URL =
-            "https://accounts.spotify.com/authorize?client_id=%s&response_type=code&scope=user-read-playback-state&redirect_uri=%s";
+            "https://accounts.spotify.com/authorize?client_id=CLIENT&response_type=code&scope=user-read-playback-state%20user-modify-playback-state&redirect_uri=URI";
 
     private static final String TOKEN_URL =
             "https://accounts.spotify.com/api/token";
@@ -75,7 +75,7 @@ public class SpotifyAuthService {
             return item.getString("code");
         }
 
-        String url = String.format(GET_CODE_URL, clientId, redirectUrl);
+        String url =  GET_CODE_URL.replace("CLIENT", clientId).replace("URI", redirectUrl);
         throw new ApiException(url);
     }
 
