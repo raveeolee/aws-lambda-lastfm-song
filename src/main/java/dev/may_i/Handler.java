@@ -5,11 +5,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 
 import java.util.Map;
 
-public class AwsLambdaHandler implements RequestHandler<Map<String,Object>, String> {
+public class Handler implements RequestHandler<Map<String,Object>, String> {
     private final SpotifyMusicHandler handler;
     private final HandlerProvider injector;
 
-    public AwsLambdaHandler() {
+    public Handler() {
         this.injector = DaggerHandlerProvider.create();
         this.handler = provider();
     }

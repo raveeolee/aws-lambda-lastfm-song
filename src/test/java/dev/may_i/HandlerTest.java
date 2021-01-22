@@ -6,45 +6,43 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.HashMap;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class AwsLambdaHandlerTest {
+class HandlerTest {
 
     @Spy
-    private AwsLambdaHandler lambdaHandler;
+    private Handler lambdaHandler;
 
     @Mock
     Context context;
 
     @Mock
-    SpotifyMusicHandler handler;
+    SpotifyMusicHandler spotifyMusicHandler;
 
     @Test
     void handleRequest() {
-        AwsLambdaHandler awsLambdaHandler = new AwsLambdaHandler() {
+        Handler handler = new Handler() {
             @Override
             protected SpotifyMusicHandler provider() {
-                return handler;
+                return spotifyMusicHandler;
             }
         };
 
         HashMap<String, Object> event = new HashMap<>();
-        awsLambdaHandler.handleRequest(event, context);
+        handler.handleRequest(event, context);
 
-        verify(handler).handleRequest(eq(event), eq(context));
+        verify(this.spotifyMusicHandler).handleRequest(eq(event), eq(context));
     }
 
     @Test
     void test_handler_creation() {
-        AwsLambdaHandler awsLambdaHandler = new AwsLambdaHandler();
+        Handler handler = new Handler();
 
-        SpotifyMusicHandler provider = awsLambdaHandler.provider();
+        SpotifyMusicHandler provider = handler.provider();
         assertThat(provider).isNotNull().isInstanceOf(SpotifyMusicHandler.class);
     }
 }
