@@ -38,7 +38,7 @@ class SpotifyAuthServiceTest {
         given(dynamoDB.getTable("DDB_TABLE")).willReturn(table);
         given(table.getItem(eq("id"), eq("token"))).willReturn(fakeItem());
 
-        SpotifyToken accessToken = spotifyAuthService.getOrRequestAccessToken(context);
+        SpotifyToken accessToken = spotifyAuthService.requestAccessToken(context);
         assertThat(accessToken.toString())
                 .isEqualTo("SpotifyToken{access_token='access_token', token_type='token_type', expires_in=0, refresh_token='refresh_token', scope='scope'}");
     }
@@ -57,7 +57,7 @@ class SpotifyAuthServiceTest {
                 .willReturn(Optional.of("12345"));
 
         assertThatThrownBy(() ->
-                spotifyAuthService.getOrRequestAccessToken(context))
+                spotifyAuthService.requestAccessToken(context))
                 .isInstanceOf(ApiException.class)
                 .hasMessage("Please provide client id and secret");
 
@@ -80,7 +80,7 @@ class SpotifyAuthServiceTest {
                         "secret", "secret_value"
                 ));
 
-        assertThatThrownBy(() -> spotifyAuthService.getOrRequestAccessToken(context))
+        assertThatThrownBy(() -> spotifyAuthService.requestAccessToken(context))
                 .isInstanceOf(ApiException.class);
 
         ArgumentCaptor<Item> itemArgumentCaptor = ArgumentCaptor.forClass(Item.class);
@@ -102,7 +102,7 @@ class SpotifyAuthServiceTest {
                         "secret", "secret_value"
                 ));
 
-        assertThatThrownBy(() -> spotifyAuthService.getOrRequestAccessToken(context))
+        assertThatThrownBy(() -> spotifyAuthService.requestAccessToken(context))
                 .isInstanceOf(ApiException.class)
                 .hasMessage("https://accounts.spotify.com/authorize?client_id=client_id_value&response_type=code&scope=user-read-playback-state%20user-modify-playback-state&redirect_uri=https://test.org/code");
     }
@@ -123,7 +123,7 @@ class SpotifyAuthServiceTest {
                         "secret", "secret_value"
                 ));
 
-        spotifyAuthService.getOrRequestAccessToken(context);
+        spotifyAuthService.requestAccessToken(context);
     }
 
     @Test
@@ -135,7 +135,7 @@ class SpotifyAuthServiceTest {
         token.setExpires_in(100L);
         given(requester.executeRequest(any(), any(), any())).willReturn(token);
 
-        SpotifyToken tokenResult = spotifyAuthService.getOrRequestAccessToken(context);
+        SpotifyToken tokenResult = spotifyAuthService.requestAccessToken(context);
         assertThat(tokenResult.isExpired()).isFalse();
     }
 
@@ -153,14 +153,16 @@ class SpotifyAuthServiceTest {
     void get_or_request_token_when_token_expired() {
         SpotifyToken token = mock(SpotifyToken.class);
         given(token.isExpired()).willReturn(true);
-        given(token.getAccess_token()).willReturn("token-123");
+        given(token.getRefresh_token()).willReturn("123");
+        given(token.getExpires_in()).willReturn(System.currentTimeMillis() / 1000 + 100000);
         given(context.getDbTableName()).willReturn("DDB_TABLE");
         given(dynamoDB.getTable("DDB_TABLE")).willReturn(table);
-        given(table.getItem(eq("id"), eq("token"))).willReturn(fakeItem());
+        given(requester.executeRequest(any(), any(), eq(SpotifyToken.class))).willReturn(token);
+        tableConfigurationForClientIdAndCodePresent();
 
         SpotifyAuthService service = spy(spotifyAuthService);
         service.token(context, token);
-        verify(service).getOrRequestAccessToken(eq(context));
+        verify(service).refreshToken(eq(context), eq(token));
     }
 
     private Item fakeItem() {

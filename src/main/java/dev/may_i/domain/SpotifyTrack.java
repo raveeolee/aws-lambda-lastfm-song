@@ -56,10 +56,15 @@ public class SpotifyTrack {
     }
 
     public ArtistResponseJson toJson() {
-        String artists = getItem().getArtists().stream()
+        String artists = getItem().getArtists()
+                .stream()
                 .map(SpotifyTrack.Artist::getName)
                 .collect(Collectors.joining(","));
+
+        if (artists.isEmpty()) {
+            return new ArtistResponseJson("Nothing...", getItem().getName());
+        }
+
         return new ArtistResponseJson(artists, getItem().getName());
     }
-
 }

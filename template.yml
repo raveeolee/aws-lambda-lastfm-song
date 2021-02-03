@@ -17,8 +17,8 @@ Resources:
     Properties:
       CodeUri: build/distributions/aws-lambda-lastfm-song.zip
       Handler: dev.may_i.Handler
-      Runtime: java8
-      Description: Java function
+      Runtime: java11
+      Description: Spotify backend in using AWS lambda
       Environment:
         Variables:
           DDB_TABLE: !Ref ddbTable

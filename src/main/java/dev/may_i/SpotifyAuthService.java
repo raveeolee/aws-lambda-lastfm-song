@@ -31,14 +31,19 @@ public class SpotifyAuthService {
     public SpotifyToken getOrSaveToken(Table db,
                                        String code,
                                        UserCredentials credentials,
-                                       String redirect) {
-
+                                       String redirect
+    ) {
         return getExistingTokenFromDb(db)
-                .orElseGet(() -> {
-                    SpotifyToken token = getOrRequestAccessToken(code, credentials, redirect);
-                    db.putItem(token.toItem());
-                    return token;
-                });
+                .orElseGet(() -> getNewToken(db, code, credentials, redirect));
+    }
+
+    public SpotifyToken getNewToken(Table db,
+                                    String code,
+                                    UserCredentials credentials,
+                                    String redirect) {
+        SpotifyToken token = requestAccessToken(code, credentials, redirect);
+        db.putItem(token.toItem());
+        return token;
     }
 
     private Optional<SpotifyToken> getExistingTokenFromDb(Table db) {
@@ -46,15 +51,26 @@ public class SpotifyAuthService {
                 .map(SpotifyToken::new);
     }
 
-    private SpotifyToken getOrRequestAccessToken(String code, UserCredentials credentials, String redirect) {
-
-        OkHttpClient client = new OkHttpClient();
+    private SpotifyToken requestAccessToken(String code, UserCredentials credentials, String redirect) {
         RequestBody body = new FormBody.Builder()
                 .addEncoded("grant_type", "authorization_code")
                 .addEncoded("code", code)
                 .addEncoded("redirect_uri", redirect)
                 .build();
 
+        return requestToken(credentials, body);
+    }
+
+    private SpotifyToken refreshAccessToken(UserCredentials credentials, String refreshToken) {
+        RequestBody body = new FormBody.Builder()
+                .addEncoded("grant_type", "refresh_token")
+                .addEncoded("refresh_token", refreshToken)
+                .build();
+
+        return requestToken(credentials, body);
+    }
+
+    private SpotifyToken requestToken(UserCredentials credentials, RequestBody body) {
         Request request = new Request.Builder()
                 .addHeader("Authorization",
                         Credentials.basic(credentials.getClientId(), credentials.getSecret()))
@@ -63,7 +79,7 @@ public class SpotifyAuthService {
                 .post(body)
                 .build();
 
-        SpotifyToken tokenRaw = requester.executeRequest(request, client, SpotifyToken.class);
+        SpotifyToken tokenRaw = requester.executeRequest(request, new OkHttpClient(), SpotifyToken.class);
         return new SpotifyToken(tokenRaw,
                 System.currentTimeMillis() / 1000 + tokenRaw.getExpires_in()
         );
@@ -108,7 +124,7 @@ public class SpotifyAuthService {
                 .ifPresent(code -> db.putItem(new Item().with("id", "code").with("code", code)));
     }
 
-    public SpotifyToken getOrRequestAccessToken(LambdaContext context) {
+    public SpotifyToken requestAccessToken(LambdaContext context) {
         Table accessKeyTbl = dynamoDB.getTable(context.getDbTableName());
         Optional<SpotifyToken> existingTokenFromDb = getExistingTokenFromDb(accessKeyTbl);
         if (existingTokenFromDb.isPresent()) {
@@ -123,17 +139,23 @@ public class SpotifyAuthService {
                 accessKeyTbl, credentials.getClientId(), redirectUrl
         );
 
-        return getOrSaveToken(
-                accessKeyTbl,
-                code,
-                credentials,
-                redirectUrl
-        );
+        return getOrSaveToken(accessKeyTbl, code, credentials, redirectUrl);
+    }
+
+    public SpotifyToken refreshToken(LambdaContext context, SpotifyToken accessToken) {
+        Table db = dynamoDB.getTable(context.getDbTableName());
+        saveCodeWhenOauthCodeCallback(context, db);
+        UserCredentials credentials = makeSureClientIdAndSecretPresent(context, db);
+
+        SpotifyToken token = refreshAccessToken(credentials, accessToken.getRefresh_token());
+        db.putItem(token.toItem());
+        return token;
     }
 
     public String token(LambdaContext context, SpotifyToken accessToken) {
         if (accessToken.isExpired()) {
-            getOrRequestAccessToken(context).getAccess_token();
+            context.log("Token is expired!");
+            return refreshToken(context, accessToken).getAccess_token();
         }
         return accessToken.getAccess_token();
     }

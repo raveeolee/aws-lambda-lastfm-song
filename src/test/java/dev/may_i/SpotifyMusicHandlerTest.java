@@ -58,7 +58,7 @@ class SpotifyMusicHandlerTest {
 
         // then
         ArgumentCaptor<LambdaContext> lambdaContextCaptor = ArgumentCaptor.forClass(LambdaContext.class);
-        verify(spotifyAuthService).getOrRequestAccessToken(lambdaContextCaptor.capture());
+        verify(spotifyAuthService).requestAccessToken(lambdaContextCaptor.capture());
         assertThat(lambdaContextCaptor.getValue()).isNotNull();
         assertThat(lambdaContextCaptor.getValue()
                 .getDomainName())
@@ -69,7 +69,7 @@ class SpotifyMusicHandlerTest {
     void should_use_the_token_to_display_current_track() {
         // given
         SpotifyToken token = mock(SpotifyToken.class);
-        given(spotifyAuthService.getOrRequestAccessToken(any())).willReturn(token);
+        given(spotifyAuthService.requestAccessToken(any())).willReturn(token);
         Map<String, Object> event = contextHelper.event(contextHelper.params(), contextHelper.requestContext());
         Context context = new TestContext();
 
