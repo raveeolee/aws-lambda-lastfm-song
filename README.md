@@ -1,4 +1,4 @@
-# Spotify backend using AWS Lambda and Dynamo DB
+# Spotify backend using AWS Lambda, Dynamo DB & CloudFormation
 
 GET https://xxxx.amazonaws.com/song
 
