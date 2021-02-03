@@ -1,4 +1,4 @@
-# Basic AWS Lambda endpoint to parse Last.fm last song for a user
+# Spotify backend using AWS Lambda and Dynamo DB
 
 GET https://xxxx.amazonaws.com/song
 
