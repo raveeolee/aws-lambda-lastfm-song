@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: An AWS Lambda application that calls the Lambda API.
+Resources:
+  ddbTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: access
+      PrimaryKey:
+        Name: id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+  function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: build/distributions/spotify_backend_with_lambda.zip
+      Handler: dev.may_i.Handler
+      Runtime: java11
+      Description: Spotify backend in using AWS lambda and Dynamo DB
+      Environment:
+        Variables:
+          DDB_TABLE: !Ref ddbTable
+      MemorySize: 512
+      Timeout: 10
+      # Function's execution role
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ddbTable
+        #- DynamoDBWritePolicy:
+        #    TableName: !Ref ddbTable
+        #- AWSLambdaBasicExecutionRole
+        #- AWSLambdaReadOnlyAccess
+        #- AWSXrayWriteOnlyAccess
+        #- AWSLambdaVPCAccessExecutionRole
+      Tracing: Active
