@@ -38,9 +38,12 @@ To deploy the application, run `2-deploy.sh`.
 This script uses AWS CloudFormation to deploy the Lambda functions and an IAM role. If the AWS CloudFormation stack that contains the resources already exists, the script updates it with any changes to the template or function code.
 
 # Set up AWS Lambda API Gateway
-Connect API gateway to your lambda [function](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html).
-Create Spotify Application via [dashboard](https://developer.spotify.com/dashboard/applications). Get Client id and Secret.
-Execute 
+- Setup [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) & aws configure.
+- Connect API gateway to your lambda [function](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started.html).
+Create two 2 endpoints: /code and /song
+![API-Connection](images/spotify-backend.png)
+- Create Spotify Application via [dashboard](https://developer.spotify.com/dashboard/applications). Get Client id and Secret.
+- Execute 
 ```GET https://xxxx.amazonaws.com/song?client_id={YOUR_CLIENT_ID}&secret={YOUR_SECRET}```
 This will lead you through the OAUTH2 process.
 ```
@@ -48,7 +51,7 @@ This will lead you through the OAUTH2 process.
   "error": "https://accounts.spotify.com/authorize?client_id={YOUR_CLIENT_ID}&response_type=code&scope=user-read-playback-state%20user-modify-playback-state&redirect_uri=https://xxxx.amazonaws.com/code"
 }
 ```
-Follow the URL to authorize the lambda with requested OAuth2 scopes.
+- Follow the URL to authorize the lambda with requested OAuth2 scopes.
 
 # Test
 GET https://xxxx.amazonaws.com/song
